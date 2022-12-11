@@ -24,3 +24,4 @@ hs_err_pid*
 replay_pid*
 
 config.java
+foreign-exchange-service/src/main/resources/application.properties
