@@ -1,10 +1,9 @@
 package com.aka.foreignexchangeservice.model;
 
+import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.*;
-
-import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name="foreign_currency")
@@ -19,7 +18,10 @@ public class ForeignCurrency{
 	private String base;
 
     @Column(name="date")
-    private	String date;
+    private	Date date;
+
+    @Column(name="api_source")
+    private String apiSource;
 
     @ElementCollection
     @CollectionTable(name = "rates", 
@@ -27,28 +29,7 @@ public class ForeignCurrency{
     @MapKeyColumn(name = "currency_code")
     @Column(name = "exchange_rate")
     private Map<String, Double> rates;
-	
-    @Column(name="time_stamp")
-	private Long timestamp;
 
-    @Column(name="success")
-    private boolean success;
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
 
     public ForeignCurrency() {
     }
@@ -58,18 +39,25 @@ public class ForeignCurrency{
 		return id;
 	}*/
 
-	public ForeignCurrency(String base, String date, Map<String, Double> rates, Long timestamp,
-            boolean success) {
-        this.base = base;
-        this.date = date;
-        this.rates = rates;
-        this.timestamp = timestamp;
-        this.success = success;
-    }
 
     public void setId(int id) {
 		this.id = id;
 	}
+
+    public ForeignCurrency(String base, Date date, String apiSource, Map<String, Double> rates) {
+        this.base = base;
+        this.date = date;
+        this.apiSource = apiSource;
+        this.rates = rates;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
 
     public Map<String, Double> getRates() {
         return rates;
@@ -87,18 +75,18 @@ public class ForeignCurrency{
         this.base = base;
     }
 
-    public Long getTimestamp() {
-        return timestamp;
+    public String getApiSource() {
+        return apiSource;
     }
 
-    public void setTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
+    public void setApiSource(String apiSource) {
+        this.apiSource = apiSource;
     }
 
     @Override
     public String toString() {
-        return "ForeignCurrency [base=" + base + ", date=" + date + ", rates=" + rates + ", timestamp=" + timestamp
-                + ", success=" + success + "]";
+        return "ForeignCurrency [id=" + id + ", base=" + base + ", date=" + date + ", apiSource=" + apiSource
+                + ", rates=" + rates + "]";
     }
 
 
