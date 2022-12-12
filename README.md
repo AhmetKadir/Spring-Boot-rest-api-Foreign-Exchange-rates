@@ -1,2 +1,4 @@
 # Spring-boot-rest-api-Foreign-Exchange
- Get Current Euro/Try and Usd/Try exchange rates from fixer api using Spring boot webclient, mysql
+The goal of this project is to create a system that can automatically retrieve current foreign exchange rates from two different APIs (here fixer api and currency data api are used) on an hourly basis. The system should save the data into a database, and provide features for filtering and sorting the data by currency, date, and API. For example, users should be able to easily retrieve the exchange rate for a specific currency on a specific date, or compare the rates from different APIs for a given time period.
+
+This system is needed because foreign exchange rates can fluctuate rapidly, and having accurate and up-to-date information is critical for businesses and individuals that need to make currency conversions. By automating the process of obtaining and storing this data, we can save time and ensure that the information is always accurate and up-to-date
