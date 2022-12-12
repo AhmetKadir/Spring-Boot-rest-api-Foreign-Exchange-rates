@@ -1,6 +1,5 @@
 package com.aka.foreignexchangeservice;
 
-import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -28,6 +27,10 @@ import reactor.core.publisher.Mono;
 public class ApiClient {
 	private static final String FIXER_BASE_URL = "https://api.apilayer.com/fixer/latest?symbols=try";
 	private static final String CURRENCY_DATA_URL = "https://api.apilayer.com/currency_data/live?";
+	private static final String FIXER_EUR_URL = "&base=eur";
+	private static final String FIXER_USD_URL = "&base=usd";
+	private static final String CURRENCY_DATA_EUR_URL = "source=EUR&currencies=TRY";
+	private static final String CURRENCY_DATA_USD_URL = "source=USD&currencies=TRY";
 	// Enter your API key here
 	private static final String API_KEY = config.myApiKey;
 
@@ -39,98 +42,31 @@ public class ApiClient {
 	@Async
 	@Scheduled(fixedRate = 3600000)
     public void getEuroTryFixerApi() {
-		Mono<Map<String, Object>> response = client.get()
-			.uri(FIXER_BASE_URL + "&base=eur")
-			.accept(MediaType.APPLICATION_JSON)
-			.header("apikey", API_KEY)
-			.retrieve()
-			.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {});
-		
-		// Map the response to a ForeignCurrency instance
-		Mono<ForeignCurrency> currency = response.map(result -> {
-			ForeignCurrency foreignCurrency = new ForeignCurrency();
-			foreignCurrency.setBase((String) result.get("base"));
-			foreignCurrency.setRates((Map<String, Double>) result.get("rates"));
-			Integer timestampint = (Integer) result.get("timestamp");
-			long timestamp = Long.valueOf(timestampint.longValue());
-			Instant instant = Instant.ofEpochSecond(timestamp);
-			// add +3 hours to the timestamp to get the correct date in Turkey (GMT+3)
-			instant = instant.plus( Duration.ofHours(3) );
-			foreignCurrency.setDate(Date.from(instant));
-			return foreignCurrency;
-		});
+		updateCurrency(FIXER_BASE_URL, FIXER_EUR_URL, "fixerApi", "base", "rates");
+	}
 
-		ForeignCurrency theCurrency = currency.block();
-		theCurrency.setApiSource("fixerApi");
-		dao.save(theCurrency);
-
-    }
+    
 	@Async
 	@Scheduled(fixedRate = 3600000)
 	public void getUsdTryFixerApi() {
-		Mono<Map<String, Object>> response = client.get()
-			.uri(FIXER_BASE_URL + "&base=usd")
-			.accept(MediaType.APPLICATION_JSON)
-			.header("apikey", API_KEY)
-			.retrieve()
-			.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {});
-		
-		// Map the response to a ForeignCurrency instance
-		Mono<ForeignCurrency> currency = response.map(result -> {
-			ForeignCurrency foreignCurrency = new ForeignCurrency();
-			foreignCurrency.setBase((String) result.get("base"));
-			foreignCurrency.setRates((Map<String, Double>) result.get("rates"));
-			Integer timestampint = (Integer) result.get("timestamp");
-			long timestamp = Long.valueOf(timestampint.longValue());
-			Instant instant = Instant.ofEpochSecond(timestamp);
-			// add +3 hours to the timestamp to get the correct date in Turkey (GMT+3)
-			instant = instant.plus( Duration.ofHours(3) );
-			foreignCurrency.setDate(Date.from(instant));
-			return foreignCurrency;
-		});
-
-		ForeignCurrency theCurrency = currency.block();
-		theCurrency.setApiSource("fixerApi");
-		dao.save(theCurrency);
-
+		updateCurrency(FIXER_BASE_URL, FIXER_USD_URL, "fixerApi", "base", "rates");
     }
 
 	@Async
 	@Scheduled(fixedRate = 3600000)
 	public void getEuroTryCurrencyDataApi() {
-		Mono<Map<String, Object>> response = client.get()
-			.uri(CURRENCY_DATA_URL + "source=EUR&currencies=TRY")
-			.accept(MediaType.APPLICATION_JSON)
-			.header("apikey", API_KEY)
-			.retrieve()
-			.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {});
-		
-		// Map the response to a ForeignCurrency instance
-		Mono<ForeignCurrency> currency = response.map(result -> {
-			ForeignCurrency foreignCurrency = new ForeignCurrency();
-			foreignCurrency.setBase((String) result.get("source"));
-			foreignCurrency.setRates((Map<String, Double>) result.get("quotes"));
-			Integer timestampint = (Integer) result.get("timestamp");
-			long timestamp = Long.valueOf(timestampint.longValue());
-			Instant instant = Instant.ofEpochSecond(timestamp);
-			// add +3 hours to the timestamp to get the correct date in Turkey (GMT+3)
-			instant = instant.plus( Duration.ofHours(3) );
-			foreignCurrency.setDate(Date.from(instant));
-			return foreignCurrency;
-		});
-
-		ForeignCurrency theCurrency = currency.block();
-
-		theCurrency.setApiSource("currencyDataApi");
-
-		dao.save(theCurrency);
+		updateCurrency(CURRENCY_DATA_URL, CURRENCY_DATA_EUR_URL, "currencyDataApi", "source", "quotes");
     }
 
 	@Async
 	@Scheduled(fixedRate = 3600000)
 	public void getUsdTryCurrencyDataApi() {
+		updateCurrency(CURRENCY_DATA_URL, CURRENCY_DATA_USD_URL, "currencyDataApi", "source", "quotes");
+    }
+
+	public void updateCurrency(String baseUrl, String url, String apiSource, String base, String rates) {
 		Mono<Map<String, Object>> response = client.get()
-			.uri(CURRENCY_DATA_URL + "source=USD&currencies=TRY")
+			.uri(baseUrl + url)
 			.accept(MediaType.APPLICATION_JSON)
 			.header("apikey", API_KEY)
 			.retrieve()
@@ -139,8 +75,8 @@ public class ApiClient {
 		// Map the response to a ForeignCurrency instance
 		Mono<ForeignCurrency> currency = response.map(result -> {
 			ForeignCurrency foreignCurrency = new ForeignCurrency();
-			foreignCurrency.setBase((String) result.get("source"));
-			foreignCurrency.setRates((Map<String, Double>) result.get("quotes"));
+			foreignCurrency.setBase((String) result.get(base));
+			foreignCurrency.setRates((Map<String, Double>) result.get(rates));
 			Integer timestampint = (Integer) result.get("timestamp");
 			long timestamp = Long.valueOf(timestampint.longValue());
 			Instant instant = Instant.ofEpochSecond(timestamp);
@@ -151,7 +87,7 @@ public class ApiClient {
 		});
 
 		ForeignCurrency theCurrency = currency.block();
-		theCurrency.setApiSource("currencyDataApi");
+		theCurrency.setApiSource(apiSource);
 
 		dao.save(theCurrency);
 
