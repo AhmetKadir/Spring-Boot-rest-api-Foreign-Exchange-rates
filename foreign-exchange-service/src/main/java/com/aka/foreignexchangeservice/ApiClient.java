@@ -1,8 +1,4 @@
 package com.aka.foreignexchangeservice;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Date;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +12,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.aka.foreignexchangeservice.model.ForeignCurrency;
-import com.aka.foreignexchangeservice.repository.ForeignCurrencyDao;
+import com.aka.foreignexchangeservice.repository.ForeignCurrencyRepository;
 
 import reactor.core.publisher.Mono;
 
-@SuppressWarnings("unchecked")
+//@SuppressWarnings("unchecked")
 @EnableAsync
 @Configuration
 @EnableScheduling
@@ -37,7 +33,7 @@ public class ApiClient {
 	WebClient client = WebClient.create();
 	
 	@Autowired
-	private ForeignCurrencyDao dao;
+	private ForeignCurrencyRepository foreignCurrencyRepository;
 
 	@Async
 	@Scheduled(fixedRate = 3600000)
@@ -78,18 +74,18 @@ public class ApiClient {
 			foreignCurrency.setBase((String) result.get(base));
 			foreignCurrency.setRates((Map<String, Double>) result.get(rates));
 			Integer timestampint = (Integer) result.get("timestamp");
-			long timestamp = Long.valueOf(timestampint.longValue());
-			Instant instant = Instant.ofEpochSecond(timestamp);
-			// add +3 hours to the timestamp to get the correct date in Turkey (GMT+3)
-			instant = instant.plus( Duration.ofHours(3) );
-			foreignCurrency.setDate(Date.from(instant));
+
+			// get Day and Time from the timestamp in the response and set it to the ForeignCurrency instance 
+			String day = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date (timestampint*1000L));
+			String time = new java.text.SimpleDateFormat("HH").format(new java.util.Date (timestampint*1000L));
+			foreignCurrency.setDay(day);
+			foreignCurrency.setTime(time);
 			return foreignCurrency;
 		});
 
 		ForeignCurrency theCurrency = currency.block();
 		theCurrency.setApiSource(apiSource);
 
-		dao.save(theCurrency);
-
+		foreignCurrencyRepository.save(theCurrency);
     }
 }

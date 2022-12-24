@@ -1,6 +1,5 @@
 package com.aka.foreignexchangeservice.model;
 
-import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.*;
@@ -17,8 +16,11 @@ public class ForeignCurrency{
     @Column(name="base", length = 3)
 	private String base;
 
-    @Column(name="date")
-    private	Date date;
+    @Column(name="day")
+    private	String day;
+
+    @Column(name="time")
+    private String time;
 
     @Column(name="api_source")
     private String apiSource;
@@ -34,30 +36,17 @@ public class ForeignCurrency{
     public ForeignCurrency() {
     }
 
-
-    /*public int getId() {
-		return id;
-	}*/
-
-
-    public void setId(int id) {
-		this.id = id;
-	}
-
-    public ForeignCurrency(String base, Date date, String apiSource, Map<String, Double> rates) {
+    public ForeignCurrency(String base, String day, String hour, String apiSource, Map<String, Double> rates) {
         this.base = base;
-        this.date = date;
+        this.day = day;
+        this.time = hour;
         this.apiSource = apiSource;
         this.rates = rates;
     }
 
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
+    public void setId(int id) {
+		this.id = id;
+	}
 
     public Map<String, Double> getRates() {
         return rates;
@@ -83,25 +72,33 @@ public class ForeignCurrency{
         this.apiSource = apiSource;
     }
 
+    public String getDay() {
+        return day;
+    }
+
+    public void setDay(String day) {
+        this.day = day;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String hour) {
+        this.time = hour;
+    }
+
     @Override
     public String toString() {
-        return "ForeignCurrency [id=" + id + ", base=" + base + ", date=" + date + ", apiSource=" + apiSource
-                + ", rates=" + rates + "]";
+        return "ForeignCurrency{" +
+                "id=" + id +
+                ", base='" + base + '\'' +
+                ", day='" + day + '\'' +
+                ", hour='" + time + '\'' +
+                ", apiSource='" + apiSource + '\'' +
+                ", rates=" + rates +
+                '}';
     }
 
 
-	/*
-	"success": true,
-    "timestamp": 1519296206,
-    "base": "EUR",
-    "date": "2022-11-25",
-    "rates": 
-        "AUD": 1.566015,
-        "CAD": 1.560132,
-        "CHF": 1.154727,
-        "CNY": 7.827874,
-        "GBP": 0.882047,
-        "JPY": 132.360679,
-        "USD": 1.23396,
-	*/
 }
