@@ -25,3 +25,5 @@ replay_pid*
 
 config.java
 foreign-exchange-service/src/main/resources/application.properties
+.vscode/launch.json
+.vscode/settings.json
