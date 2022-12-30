@@ -12,4 +12,5 @@ public interface ForeignCurrencyRepository extends JpaRepository<ForeignCurrency
 	List<ForeignCurrency> findByDay(String day);
 	List<ForeignCurrency> findByTime(String time);
 	List<ForeignCurrency> findByDayAndTime(String day, String time);
+	List<ForeignCurrency> findByDayAndTimeBetween(String day, String time1, String time2);
 }
