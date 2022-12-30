@@ -1,4 +1,6 @@
 package com.aka.foreignexchangeservice;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,8 +78,8 @@ public class ApiClient {
 			Integer timestampint = (Integer) result.get("timestamp");
 
 			// get Day and Time from the timestamp in the response and set it to the ForeignCurrency instance 
-			String day = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date (timestampint*1000L));
-			String time = new java.text.SimpleDateFormat("HH").format(new java.util.Date (timestampint*1000L));
+			String day = new SimpleDateFormat("yyyy-MM-dd").format(new Date (timestampint*1000L));
+			String time = new SimpleDateFormat("HH").format(new Date (timestampint*1000L));
 			foreignCurrency.setDay(day);
 			foreignCurrency.setTime(time);
 			return foreignCurrency;
